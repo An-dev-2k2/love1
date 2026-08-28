@@ -18,7 +18,7 @@ document.addEventListener('DOMContentLoaded', () => {
         },
         letterModal: {
             title: "Gửi Người Thương",
-            image: "image.webp",
+            image: "image.jpg",
             greeting: "Gửi cô gái đáng yêu,",
             paragraphs: [
                 "Cảm ơn em đã kiên nhẫn tìm thấy lá thư này... Giống như giữa muôn vàn trái tim ngoài kia, ánh mắt anh ngay từ đầu đã luôn hướng về em.",

@@ -23,7 +23,7 @@ document.addEventListener('DOMContentLoaded', () => {
         },
         letterModal: {
             title: "Gửi Người Thương",
-            image: "image.webp",
+            image: "image.jpg",
             imageCaption: "Người Thương",
             greeting: "Gửi cô gái đáng yêu,",
             paragraphs: [
@@ -195,9 +195,9 @@ document.addEventListener('DOMContentLoaded', () => {
         inputTooltipUnlocked.value = config.interactiveScreen.tooltipUnlocked || '';
         inputTooltipNeedMore.value = config.interactiveScreen.tooltipNeedMore || '';
 
-        inputLetterImage.value = config.letterModal.image || 'image.webp';
+        inputLetterImage.value = config.letterModal.image || 'image.jpg';
         if (inputLetterCaption) inputLetterCaption.value = config.letterModal.imageCaption || '';
-        formImgPreview.src = config.letterModal.image || 'image.webp';
+        formImgPreview.src = config.letterModal.image || 'image.jpg';
         inputLetterTitle.value = config.letterModal.title || '';
         inputLetterGreeting.value = config.letterModal.greeting || '';
         inputLetterSignature.value = config.letterModal.signature || '';
@@ -361,7 +361,7 @@ document.addEventListener('DOMContentLoaded', () => {
     inputTooltipNeedMore.addEventListener('input', (e) => { currentConfig.interactiveScreen.tooltipNeedMore = e.target.value; onConfigChanged(); });
 
     inputLetterImage.addEventListener('input', (e) => {
-        const val = e.target.value.trim() || 'image.webp';
+        const val = e.target.value.trim() || 'image.jpg';
         currentConfig.letterModal.image = val;
         formImgPreview.src = val;
         onConfigChanged();
@@ -435,8 +435,8 @@ document.addEventListener('DOMContentLoaded', () => {
        ========================================================================== */
     function updateLivePreview() {
         const modal = currentConfig.letterModal;
-        previewPolaroidImg.src = modal.image || 'image.webp';
-        previewPolaroidImg.onerror = function () { this.src = 'image.webp'; };
+        previewPolaroidImg.src = modal.image || 'image.jpg';
+        previewPolaroidImg.onerror = function () { this.src = 'image.jpg'; };
 
         if (previewPolaroidCaption) {
             previewPolaroidCaption.textContent = modal.imageCaption || 'Người Thương';
