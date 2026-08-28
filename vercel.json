@@ -1,4 +1,6 @@
 {
+  "buildCommand": "echo 'Building static site...'",
+  "outputDirectory": ".",
   "headers": [
     {
       "source": "/data.json",
