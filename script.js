@@ -81,38 +81,46 @@ document.addEventListener('DOMContentLoaded', () => {
         reinitHeartPile();
     });
 
+    const JSONBIN_ID = "6a91c49bda38895dfe1d27c4";
+    const JSONBIN_KEY = "$2a$10$/XYZ7oQhPs.V4PZvMNf0GOrNQS6oKhZsp22FhHLk0CDFGGfym9EYe";
+
     /**
-     * Nạp dữ liệu cấu hình: Ưu tiên LocalStorage (khi người dùng vừa tùy chỉnh) -> data.json -> DEFAULT_CONFIG
+     * Nạp dữ liệu cấu hình: Ưu tiên JSONBin Cloud -> data.json -> LocalStorage -> DEFAULT_CONFIG
      */
     async function initConfig() {
         let loaded = false;
 
-        // 1. Kiểm tra cấu hình tùy chỉnh từ LocalStorage
-        try {
-            const saved = localStorage.getItem('love_custom_config');
-            if (saved) {
-                const data = JSON.parse(saved);
-                appConfig = {
-                    pageTitle: data.pageTitle || DEFAULT_CONFIG.pageTitle,
-                    welcomeScreen: { ...DEFAULT_CONFIG.welcomeScreen, ...(data.welcomeScreen || {}) },
-                    interactiveScreen: { ...DEFAULT_CONFIG.interactiveScreen, ...(data.interactiveScreen || {}) },
-                    letterModal: {
-                        ...DEFAULT_CONFIG.letterModal,
-                        ...(data.letterModal || {}),
-                        paragraphs: Array.isArray(data.letterModal?.paragraphs) ? data.letterModal.paragraphs : DEFAULT_CONFIG.letterModal.paragraphs
-                    },
-                    audio: { ...DEFAULT_CONFIG.audio, ...(data.audio || {}) }
-                };
-                loaded = true;
+        // 1. Thử nạp từ JSONBin Cloud (để cập nhật realtime trên mọi thiết bị khi deploy Vercel)
+        if (JSONBIN_ID) {
+            try {
+                const resCloud = await fetch(`https://api.jsonbin.io/v3/b/${JSONBIN_ID}/latest?t=${Date.now()}`, {
+                    headers: { 'X-Master-Key': JSONBIN_KEY }
+                });
+                if (resCloud.ok) {
+                    const jsonResult = await resCloud.json();
+                    const data = jsonResult.record || jsonResult;
+                    appConfig = {
+                        pageTitle: data.pageTitle || DEFAULT_CONFIG.pageTitle,
+                        welcomeScreen: { ...DEFAULT_CONFIG.welcomeScreen, ...(data.welcomeScreen || {}) },
+                        interactiveScreen: { ...DEFAULT_CONFIG.interactiveScreen, ...(data.interactiveScreen || {}) },
+                        letterModal: {
+                            ...DEFAULT_CONFIG.letterModal,
+                            ...(data.letterModal || {}),
+                            paragraphs: Array.isArray(data.letterModal?.paragraphs) ? data.letterModal.paragraphs : DEFAULT_CONFIG.letterModal.paragraphs
+                        },
+                        audio: { ...DEFAULT_CONFIG.audio, ...(data.audio || {}) }
+                    };
+                    loaded = true;
+                }
+            } catch (e) {
+                console.warn('Cannot fetch from JSONBin cloud:', e);
             }
-        } catch (e) {
-            console.warn('Cannot read from localStorage:', e);
         }
 
-        // 2. Nếu chưa có trong LocalStorage, nạp từ file data.json
+        // 2. Thử nạp từ file data.json
         if (!loaded) {
             try {
-                const res = await fetch('data.json');
+                const res = await fetch(`data.json?t=${Date.now()}`);
                 if (res.ok) {
                     const data = await res.json();
                     appConfig = {
@@ -126,9 +134,34 @@ document.addEventListener('DOMContentLoaded', () => {
                         },
                         audio: { ...DEFAULT_CONFIG.audio, ...(data.audio || {}) }
                     };
+                    loaded = true;
                 }
             } catch (e) {
-                console.warn('Using default configuration due to fetch limitation:', e);
+                console.warn('Cannot fetch data.json:', e);
+            }
+        }
+
+        // 3. Thử nạp từ LocalStorage
+        if (!loaded) {
+            try {
+                const saved = localStorage.getItem('love_custom_config');
+                if (saved) {
+                    const data = JSON.parse(saved);
+                    appConfig = {
+                        pageTitle: data.pageTitle || DEFAULT_CONFIG.pageTitle,
+                        welcomeScreen: { ...DEFAULT_CONFIG.welcomeScreen, ...(data.welcomeScreen || {}) },
+                        interactiveScreen: { ...DEFAULT_CONFIG.interactiveScreen, ...(data.interactiveScreen || {}) },
+                        letterModal: {
+                            ...DEFAULT_CONFIG.letterModal,
+                            ...(data.letterModal || {}),
+                            paragraphs: Array.isArray(data.letterModal?.paragraphs) ? data.letterModal.paragraphs : DEFAULT_CONFIG.letterModal.paragraphs
+                        },
+                        audio: { ...DEFAULT_CONFIG.audio, ...(data.audio || {}) }
+                    };
+                    loaded = true;
+                }
+            } catch (e) {
+                console.warn('Cannot read from localStorage:', e);
             }
         }
 

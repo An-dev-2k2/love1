@@ -102,25 +102,47 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
+    const JSONBIN_ID = "6a91c49bda38895dfe1d27c4";
+    const JSONBIN_KEY = "$2a$10$/XYZ7oQhPs.V4PZvMNf0GOrNQS6oKhZsp22FhHLk0CDFGGfym9EYe";
+
     /* ==========================================================================
        2. INITIAL DATA LOADING
        ========================================================================== */
     async function loadInitialData() {
         let loaded = false;
 
-        // 1. Fetch trực tiếp từ data.json (kèm query timestamp)
-        try {
-            const response = await fetch(`data.json?t=${Date.now()}`);
-            if (response.ok) {
-                const data = await response.json();
-                currentConfig = mergeConfig(DEFAULT_CONFIG, data);
-                loaded = true;
+        // 1. Fetch từ JSONBin Cloud (đồng bộ realtime mọi nơi)
+        if (JSONBIN_ID) {
+            try {
+                const resCloud = await fetch(`https://api.jsonbin.io/v3/b/${JSONBIN_ID}/latest?t=${Date.now()}`, {
+                    headers: { 'X-Master-Key': JSONBIN_KEY }
+                });
+                if (resCloud.ok) {
+                    const jsonResult = await resCloud.json();
+                    const data = jsonResult.record || jsonResult;
+                    currentConfig = mergeConfig(DEFAULT_CONFIG, data);
+                    loaded = true;
+                }
+            } catch (e) {
+                console.warn('Cannot fetch from JSONBin cloud, fallback:', e);
             }
-        } catch (e) {
-            console.warn('Cannot fetch data.json directly, checking fallback:', e);
         }
 
-        // 2. Thử đọc LocalStorage nếu fetch không thành công
+        // 2. Fetch trực tiếp từ data.json (kèm query timestamp)
+        if (!loaded) {
+            try {
+                const response = await fetch(`data.json?t=${Date.now()}`);
+                if (response.ok) {
+                    const data = await response.json();
+                    currentConfig = mergeConfig(DEFAULT_CONFIG, data);
+                    loaded = true;
+                }
+            } catch (e) {
+                console.warn('Cannot fetch data.json directly, checking fallback:', e);
+            }
+        }
+
+        // 3. Thử đọc LocalStorage nếu fetch không thành công
         if (!loaded) {
             try {
                 const savedLocal = localStorage.getItem('love_custom_config');
@@ -252,50 +274,70 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     /* ==========================================================================
-       5. MANUAL SAVE TO data.json (WHEN CLICKING SAVE BUTTON)
+       5. MANUAL SAVE (LƯU LÊN JSONBIN CLOUD & LOCAL SERVER)
        ========================================================================== */
     async function saveDataToFile() {
         if (!btnSaveData) return;
 
-        if (saveBtnText) saveBtnText.textContent = 'Đang lưu...';
+        if (saveBtnText) saveBtnText.textContent = 'Đang lưu lên Cloud...';
         btnSaveData.disabled = true;
 
         const payload = JSON.stringify(currentConfig, null, 2);
-        let saved = false;
+        let cloudSaved = false;
+        let localSaved = false;
 
-        // Thử 1: Gọi endpoint tương đối /api/save (server port 3000)
+        // 1. Lưu lên JSONBin Cloud (để cập nhật realtime trực tiếp trên Vercel)
+        if (JSONBIN_ID) {
+            try {
+                const resCloud = await fetch(`https://api.jsonbin.io/v3/b/${JSONBIN_ID}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-Master-Key': JSONBIN_KEY
+                    },
+                    body: payload
+                });
+                if (resCloud.ok) cloudSaved = true;
+            } catch (e) {
+                console.warn('Lỗi lưu JSONBin Cloud:', e);
+            }
+        }
+
+        // 2. Lưu vào local server /api/save nếu đang chạy server Node/Python local
         try {
             const res = await fetch('/api/save', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: payload
             });
-            if (res.ok) saved = true;
+            if (res.ok) localSaved = true;
         } catch (e) {}
 
-        // Thử 2: Gọi http://localhost:3000/api/save nếu đang mở qua Live Server port 5500
-        if (!saved) {
+        if (!localSaved) {
             try {
                 const res3000 = await fetch('http://localhost:3000/api/save', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: payload
                 });
-                if (res3000.ok) saved = true;
+                if (res3000.ok) localSaved = true;
             } catch (e) {}
         }
 
+        // 3. Luôn cập nhật LocalStorage
+        saveToLocalStorage();
+
         btnSaveData.disabled = false;
 
-        if (saved) {
+        if (cloudSaved || localSaved) {
             if (saveBtnText) saveBtnText.textContent = 'Đã Lưu!';
-            showToast('Đã lưu thành công vào file data.json!', '🎉');
+            showToast(cloudSaved ? 'Đã lưu lên Cloud thành công! Web cập nhật ngay tức thì.' : 'Đã lưu vào data.json cục bộ!', '🎉');
             setTimeout(() => {
                 if (saveBtnText) saveBtnText.textContent = 'Lưu Thay Đổi';
             }, 2000);
         } else {
             if (saveBtnText) saveBtnText.textContent = 'Lưu Thay Đổi';
-            showToast('Đã lưu vào bộ nhớ trình duyệt! Hãy dùng nút "Tải JSON" nếu server chưa bật.', 'ℹ️');
+            showToast('Đã lưu vào bộ nhớ trình duyệt của bạn!', 'ℹ️');
         }
     }
 
