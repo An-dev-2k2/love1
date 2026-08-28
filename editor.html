@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chỉnh Sửa Nội Dung & Ảnh - Trang Tỏ Tình</title>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@600;700&family=Great+Vibes&family=Outfit:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet">
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml"
+        href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='50%25' x='50%25' dominant-baseline='central' text-anchor='middle' font-size='75'>⚙️</text></svg>">
+
+    <link rel="stylesheet" href="editor.css">
+
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+</head>
+
+<body>
+
+    <!-- Header / Navbar -->
+    <header class="editor-header">
+        <div class="header-container">
+            <a href="index.html" class="brand">
+                <span class="brand-icon"><i data-lucide="heart" class="brand-lucide-icon"></i></span>
+                <div class="brand-text">
+                    <h1>Chỉnh Sửa Trang Tỏ Tình</h1>
+                    <p>Tùy chỉnh nội dung, hình ảnh</p>
+                </div>
+            </a>
+
+            <div class="header-actions">
+                <button type="button" class="btn btn-header-save" id="btn-save-data" title="Lưu toàn bộ thay đổi vào file data.json">
+                    <i data-lucide="save"></i>
+                    <span id="save-btn-text">Lưu Thay Đổi</span>
+                </button>
+                <button type="button" class="btn btn-header" id="btn-reset-default" title="Khôi phục nội dung mặc định">
+                    <i data-lucide="rotate-ccw"></i>
+                    <span>Khôi phục</span>
+                </button>
+                <a href="index.html" target="_blank" class="btn btn-header" id="btn-preview-web" title="Mở trang web chính">
+                    <i data-lucide="external-link"></i>
+                    <span>Xem trang web</span>
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Layout -->
+    <main class="editor-main">
+
+        <!-- Left Column: Form Controls with Tabs -->
+        <section class="editor-controls">
+            <!-- Tabs Navigation -->
+            <nav class="tabs-nav" aria-label="Editor sections">
+                <button class="tab-btn active" data-tab="tab-letter">
+                    <i data-lucide="mail"></i>
+                    <span>Bức Thư & Ảnh</span>
+                </button>
+                <button class="tab-btn" data-tab="tab-welcome">
+                    <i data-lucide="layout"></i>
+                    <span>Màn Hình Chào</span>
+                </button>
+                <button class="tab-btn" data-tab="tab-interactive">
+                    <i data-lucide="mouse-pointer-click"></i>
+                    <span>Tương Tác & Lời Thoại</span>
+                </button>
+            </nav>
+
+            <!-- TAB 1: BỨC THƯ TÌNH & ẢNH KỶ NIỆM -->
+            <div id="tab-letter" class="tab-content active">
+                <div class="form-card">
+                    <h2 class="card-title">
+                        <i data-lucide="image"></i> Ảnh Kỷ Niệm (Khung Polaroid)
+                    </h2>
+
+                    <div class="image-upload-wrapper">
+                        <img id="form-img-preview" src="image.webp" alt="Ảnh kỷ niệm" class="image-thumb-preview">
+                        <div class="upload-controls">
+                            <input type="file" id="image-file-input" accept="image/*" class="file-input-hidden">
+                            <div>
+                                <button type="button" class="btn btn-secondary btn-sm" id="btn-choose-file">
+                                    <i data-lucide="folder-open"></i>
+                                    <span>Chọn ảnh từ máy tính</span>
+                                </button>
+                            </div>
+                            <span class="form-hint">Hoặc dán link ảnh / tên file vào ô bên dưới:</span>
+                            <input type="text" id="input-letter-image" class="form-input" placeholder="Ví dụ: image.webp hoặc link https://...">
+                        </div>
+                    </div>
+
+                    <div class="form-group" style="margin-top: 16px;">
+                        <label class="form-label" for="input-letter-caption">Tên / Chữ dưới ảnh Polaroid:</label>
+                        <input type="text" id="input-letter-caption" class="form-input" placeholder="Ví dụ: Người Thương hoặc Bé Yêu">
+                    </div>
+                </div>
+
+                <div class="form-card">
+                    <h2 class="card-title">
+                        <i data-lucide="file-text"></i> Nội Dung Bức Thư Bí Mật
+                    </h2>
+
+                    <div class="form-group">
+                        <label class="form-label" for="input-letter-title">Tiêu đề bức thư:</label>
+                        <input type="text" id="input-letter-title" class="form-input" placeholder="Gửi Người Thương">
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="input-letter-greeting">Lời chào mở đầu:</label>
+                        <input type="text" id="input-letter-greeting" class="form-input" placeholder="Gửi cô gái đáng yêu,">
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Các đoạn văn tâm sự / tỏ tình:</label>
+                        <div id="paragraphs-container" class="paragraphs-list">
+                            <!-- Dynamic Paragraph items inserted via JS -->
+                        </div>
+                        <button type="button" class="btn btn-secondary btn-sm" id="btn-add-paragraph">
+                            <i data-lucide="plus"></i>
+                            <span>Thêm đoạn văn mới</span>
+                        </button>
+                    </div>
+
+                    <div class="form-group" style="margin-top: 18px;">
+                        <label class="form-label" for="input-letter-signature">Chữ ký / Tên người gửi:</label>
+                        <input type="text" id="input-letter-signature" class="form-input" placeholder="Chàng Trai Thương Em">
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB 2: MÀN HÌNH CHÀO (WELCOME OVERLAY) -->
+            <div id="tab-welcome" class="tab-content">
+                <div class="form-card">
+                    <h2 class="card-title">
+                        <i data-lucide="monitor"></i> Màn Hình Chào Ban Đầu
+                    </h2>
+
+                    <div class="form-group">
+                        <label class="form-label" for="input-welcome-typewriter">Chữ gõ máy (Typewriter Effect):</label>
+                        <input type="text" id="input-welcome-typewriter" class="form-input" placeholder="Mo shi mo shiii!">
+                        <span class="form-hint">Dòng chữ này sẽ xuất hiện với hiệu ứng gõ từng ký tự kèm nhún nhảy.</span>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="input-welcome-message">Thông điệp mở đầu chính:</label>
+                        <textarea id="input-welcome-message" class="form-textarea" rows="2" placeholder="Có một món quà bí mật nhỏ đang được giấu giữa rừng trái tim ngọt ngào..."></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="input-welcome-submessage">Câu hỏi dẫn dắt phụ:</label>
+                        <textarea id="input-welcome-submessage" class="form-textarea" rows="2" placeholder="Bạn có muốn khám phá điều bí mật đang chờ đón bạn không?"></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="input-welcome-button">Chữ trên nút bắt đầu:</label>
+                        <input type="text" id="input-welcome-button" class="form-input" placeholder="Bắt đầu thôi">
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB 3: TƯƠNG TÁC & LỜI THOẠI HƯỚNG DẪN -->
+            <div id="tab-interactive" class="tab-content">
+                <div class="form-card">
+                    <h2 class="card-title">
+                        <i data-lucide="hand"></i> Gợi Ý & Nhãn Phong Bì
+                    </h2>
+
+                    <div class="form-group">
+                        <label class="form-label" for="input-interactive-drag">Gợi ý thao tác kéo tim:</label>
+                        <input type="text" id="input-interactive-drag" class="form-input" placeholder="Dùng tay/chuột kéo trái tim ra để tìm bí mật nhé!">
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="input-envelope-label">Nhãn trên lá thư nhô ra (Dòng chính):</label>
+                        <input type="text" id="input-envelope-label" class="form-input" placeholder="Gửi người thương">
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="input-envelope-sublabel">Nhãn trên lá thư nhô ra (Dòng phụ):</label>
+                        <input type="text" id="input-envelope-sublabel" class="form-input" placeholder="Nhấn để mở">
+                    </div>
+                </div>
+
+                <div class="form-card">
+                    <h2 class="card-title">
+                        <i data-lucide="message-circle"></i> Lời Thoại Chat Tooltip
+                    </h2>
+
+                    <div class="form-group">
+                        <label class="form-label" for="input-tooltip-searching">Khi đang tìm kiếm (kèm % tiến trình):</label>
+                        <input type="text" id="input-tooltip-searching" class="form-input" placeholder="Hãy tìm đủ 100% trái tim để xem thư nhé! ({percent}%) 💖">
+                        <span class="form-hint">Giữ nguyên cụm <code>{percent}</code> để hiển thị số phần trăm.</span>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="input-tooltip-unlocked">Khi đã bới đủ 100% (Sẵn sàng mở):</label>
+                        <input type="text" id="input-tooltip-unlocked" class="form-input" placeholder="Click vào bức thư để mở nè! 💌">
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="input-tooltip-needmore">Khi bấm nhầm vào phong bì lúc chưa đủ 100%:</label>
+                        <input type="text" id="input-tooltip-needmore" class="form-input" placeholder="Hãy bới đủ 100% trái tim để mở thư nhé! 💖">
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Right Column: Live Preview Panel -->
+        <aside class="preview-panel">
+            <div class="preview-card">
+                <div class="preview-header">
+                    <h3 style="font-size: 1rem; font-weight: 600; display:flex; align-items:center; gap:6px;"><i data-lucide="eye"></i> Xem Trước Bức Thư</h3>
+                    <span class="preview-badge">Live Preview</span>
+                </div>
+
+                <!-- Simulated Polaroid Frame -->
+                <div class="polaroid-preview-card">
+                    <div class="polaroid-img-box">
+                        <img id="preview-polaroid-img" src="image.webp" alt="Polaroid Preview">
+                    </div>
+                    <div id="preview-polaroid-caption" class="polaroid-caption">Người Thương</div>
+                </div>
+
+                <!-- Simulated Letter Paper -->
+                <div class="sim-letter-paper">
+                    <h4 id="preview-letter-title" class="sim-letter-title">Gửi Người Thương</h4>
+                    <div id="preview-letter-greeting" class="sim-letter-greeting">Gửi cô gái đáng yêu,</div>
+                    <div id="preview-letter-body" class="sim-letter-body">
+                        <!-- Paragraphs preview rendered here -->
+                    </div>
+                    <div id="preview-letter-sig" class="sim-letter-sig">Chàng Trai Thương Em</div>
+                </div>
+            </div>
+        </aside>
+
+    </main>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="toast">
+        <i data-lucide="check-circle" id="toast-icon"></i>
+        <span id="toast-message">Đã lưu thay đổi thành công!</span>
+    </div>
+
+    <script src="editor.js"></script>
+    <script>lucide.createIcons();</script>
+</body>
+
+</html>

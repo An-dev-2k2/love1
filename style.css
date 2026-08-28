@@ -1,0 +1,1874 @@
+/* ==========================================================================
+   CSS DESIGN SYSTEM & DESIGN TOKENS
+   ========================================================================== */
+:root {
+    --bg-deep-purple: #0f031e;
+    --bg-mid-purple: #230842;
+    --bg-light-purple: #3d0d66;
+
+    --accent-red: #ff2a5f;
+    --accent-pink: #ff6584;
+    --accent-soft-pink: #ffb3c1;
+    --accent-gold: #ffd166;
+
+    --glass-bg: rgba(255, 255, 255, 0.08);
+    --glass-border: rgba(255, 255, 255, 0.18);
+    --glass-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+
+    --font-heading: 'Great Vibes', cursive;
+    --font-script: 'Dancing Script', cursive;
+    --font-body: 'Outfit', sans-serif;
+
+    --transition-smooth: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    user-select: none;
+    -webkit-user-select: none;
+    -webkit-tap-highlight-color: transparent;
+}
+
+html,
+body {
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    font-family: var(--font-body);
+    background: radial-gradient(circle at center, var(--bg-light-purple) 0%, var(--bg-mid-purple) 45%, var(--bg-deep-purple) 100%);
+    color: #ffffff;
+}
+
+/* ==========================================================================
+   BACKGROUND CANVAS (BOKEH & PARTICLES)
+   ========================================================================== */
+#bg-canvas {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: 1;
+    pointer-events: none;
+}
+
+/* ==========================================================================
+   BASE LAYER (INTERACTIVE CONTAINER)
+   ========================================================================== */
+.interactive-layer {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 2;
+}
+
+/* Progress Bar UI */
+.progress-container {
+    position: fixed;
+    top: 22px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 8;
+    width: 90%;
+    max-width: 380px;
+    background: rgba(20, 5, 35, 0.65);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    border-radius: 20px;
+    padding: 10px 18px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4), inset 0 0 15px rgba(255, 255, 255, 0.05);
+    transition: all 0.4s var(--transition-smooth);
+}
+
+.progress-info {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #ffe6ea;
+    margin-bottom: 6px;
+}
+
+.progress-percent {
+    color: var(--accent-pink);
+    font-weight: 700;
+    font-size: 1rem;
+    text-shadow: 0 0 10px rgba(255, 101, 132, 0.6);
+}
+
+.progress-bar-track {
+    width: 100%;
+    height: 8px;
+    background: rgba(255, 255, 255, 0.12);
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.progress-bar-fill {
+    width: 0%;
+    height: 100%;
+    background: linear-gradient(90deg, #ff2a5f, #ff758f, #ffd166);
+    border-radius: 10px;
+    box-shadow: 0 0 12px rgba(255, 42, 95, 0.8);
+    transition: width 0.3s ease;
+}
+
+.progress-container.completed {
+    border-color: var(--accent-pink);
+    box-shadow: 0 0 25px rgba(255, 42, 95, 0.6);
+    animation: pulseContainer 1.5s infinite alternate;
+}
+
+.progress-container.completed .progress-percent {
+    color: #ffd166;
+}
+
+@keyframes pulseContainer {
+    0% {
+        transform: translateX(-50%) scale(1);
+    }
+
+    100% {
+        transform: translateX(-50%) scale(1.03);
+    }
+}
+
+#heart-bottom-canvas {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 3;
+    pointer-events: none;
+}
+
+#heart-canvas {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 5;
+    cursor: grab;
+}
+
+#heart-canvas:active {
+    cursor: grabbing;
+}
+
+/* ==========================================================================
+   SECRET ENVELOPE & TOOLTIP
+   ========================================================================== */
+.envelope-wrapper {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) scale(0.6);
+    z-index: 4;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.8s var(--transition-smooth), transform 0.8s var(--transition-smooth);
+}
+
+.envelope-wrapper.visible {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+    pointer-events: auto;
+    /* Nằm dưới canvas trái tim để trái tim còn đè lên phong bì (tạo hiệu ứng chôn giấu) */
+    z-index: 4;
+}
+
+/* Khi 100% mở khóa: Nâng phong bì lên TRÊN canvas trái tim để hiện rõ */
+.envelope-wrapper.unlocked {
+    z-index: 6;
+    transition: opacity 0.8s var(--transition-smooth), transform 0.8s var(--transition-smooth), z-index 0s;
+}
+
+/* Tooltip Chat Bubble — position:fixed để nằm trên tất cả canvas (z-index > 5) */
+.chat-tooltip {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, calc(-50% - 105px)) scale(0.9);
+    background: rgba(255, 255, 255, 0.96);
+    color: #c9184a;
+    padding: 10px 20px;
+    border-radius: 20px;
+    font-weight: 700;
+    font-size: 0.95rem;
+    font-family: var(--font-body);
+    border: 1.5px solid rgba(255, 100, 130, 0.35);
+    box-shadow: 0 8px 28px rgba(255, 42, 95, 0.25), 0 2px 8px rgba(0, 0, 0, 0.08);
+    white-space: nowrap;
+    opacity: 0;
+    transition: all 0.5s var(--transition-smooth);
+    pointer-events: none;
+    z-index: 15;
+}
+
+.chat-tooltip.show {
+    opacity: 1;
+    transform: translate(-50%, calc(-50% - 105px)) scale(1);
+    animation: floatTooltip 2s ease-in-out infinite alternate;
+}
+
+/* Khi phong bì mở (100%): đẩy tooltip lên cao hơn, tránh đè lên lá thư đang nhô ra */
+.chat-tooltip.envelope-open {
+    transform: translate(-50%, calc(-50% - 185px)) scale(1) !important;
+    animation: floatTooltipHigh 2s ease-in-out infinite alternate !important;
+}
+
+@keyframes floatTooltipHigh {
+    0% {
+        transform: translate(-50%, calc(-50% - 185px)) scale(1);
+    }
+
+    100% {
+        transform: translate(-50%, calc(-50% - 193px)) scale(1);
+    }
+}
+
+.chat-tooltip .tooltip-arrow {
+    position: absolute;
+    bottom: -8px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 0;
+    height: 0;
+    border-left: 8px solid transparent;
+    border-right: 8px solid transparent;
+    border-top: 8px solid rgba(255, 255, 255, 0.96);
+}
+
+@keyframes floatTooltip {
+    0% {
+        transform: translate(-50%, calc(-50% - 105px)) scale(1);
+    }
+
+    100% {
+        transform: translate(-50%, calc(-50% - 113px)) scale(1);
+    }
+}
+
+/* Envelope Container */
+.envelope-glow-aura {
+    position: absolute;
+    width: 280px;
+    height: 200px;
+    background: radial-gradient(circle, rgba(255, 42, 95, 0.45) 0%, rgba(255, 101, 132, 0.2) 50%, transparent 70%);
+    border-radius: 50%;
+    z-index: 1;
+    pointer-events: none;
+    opacity: 0.7;
+    transition: opacity 0.5s ease, transform 0.5s ease;
+    animation: auraPulse 3s ease-in-out infinite alternate;
+}
+
+@keyframes auraPulse {
+    0% {
+        transform: scale(0.95);
+        opacity: 0.5;
+    }
+
+    100% {
+        transform: scale(1.1);
+        opacity: 0.85;
+    }
+}
+
+.envelope {
+    position: relative;
+    width: 200px;
+    height: 130px;
+    border-radius: 14px;
+    cursor: pointer;
+    transition: transform 0.4s var(--transition-smooth), box-shadow 0.4s ease;
+    box-shadow: 0 20px 45px rgba(0, 0, 0, 0.45), 0 0 25px rgba(255, 42, 95, 0.3);
+    z-index: 2;
+}
+
+.envelope:hover {
+    transform: translateY(-5px) scale(1.04);
+}
+
+.envelope-back {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    border-radius: 14px;
+    background: linear-gradient(135deg, #fff0f3 0%, #ffe3e8 100%);
+    border: 1.5px solid #ffccd5;
+    z-index: 1;
+}
+
+/* Letter Clip Zone: clip lá thư không tràn ra ngoài phong bì */
+.letter-clip {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    /* Chỉ clip phần dưới của phong bì, phần trên mở để lá thư nhô lên khi mở */
+    bottom: 0;
+    overflow: hidden;
+    z-index: 2;
+    border-radius: 14px;
+    pointer-events: none;
+}
+
+/* Khi 100% mở khoá: bỏ overflow hidden để lá thư trượt lên tự do */
+.envelope.ready-to-click .letter-clip {
+    overflow: visible;
+}
+
+/* Letter Card Peeking out — Styled like a real paper letter */
+.letter-peek {
+    position: absolute;
+    top: 15px;
+    left: 12px;
+    right: 12px;
+    height: 108px;
+    /* Giấy thư vintage với đường kẻ ngang như sổ tay */
+    background: #fffdf7;
+    background-image:
+        linear-gradient(to bottom, transparent 90%, rgba(255, 179, 193, 0.35) 90%),
+        linear-gradient(180deg, #fffdf9 0%, #fff6f8 100%);
+    background-size: 100% 22px, 100% 100%;
+    border-radius: 10px 10px 4px 4px;
+    border: 1px solid #ffccd5;
+    outline: 1px dashed #ff9ebb;
+    outline-offset: -4px;
+    box-shadow: 0 -4px 14px rgba(0, 0, 0, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.9);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 8px 10px;
+    transition: transform 0.6s cubic-bezier(0.34, 1.3, 0.64, 1), box-shadow 0.4s ease;
+    pointer-events: none;
+    overflow: hidden;
+    text-align: center;
+}
+
+/* Dải lề đỏ bên trái như trang giấy viết tay */
+.letter-peek::after {
+    content: '';
+    position: absolute;
+    left: 20px;
+    top: 0;
+    bottom: 0;
+    width: 1px;
+    background: rgba(255, 100, 130, 0.2);
+}
+
+/* Con tem góc trên bên phải */
+.letter-peek-stamp {
+    position: absolute;
+    top: 6px;
+    right: 8px;
+    font-size: 1.15rem;
+    line-height: 1;
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.15));
+    background: rgba(255, 255, 255, 0.85);
+    border: 1px dashed #ffb3c1;
+    border-radius: 4px;
+    padding: 2px 4px;
+}
+
+.letter-peek-body {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    text-align: center;
+    margin: 0 auto;
+    z-index: 1;
+}
+
+.letter-preview-text {
+    font-family: var(--font-script);
+    font-size: 1.25rem;
+    color: #a4133c;
+    font-weight: 700;
+    text-shadow: 0 1px 2px rgba(255, 255, 255, 0.9);
+    line-height: 1.3;
+    display: block;
+    width: 100%;
+    text-align: center;
+    margin: 0 auto;
+}
+
+.letter-subtext {
+    font-size: 0.65rem;
+    color: #ff4d6d;
+    margin-top: 4px;
+    font-weight: 600;
+    opacity: 0.95;
+    letter-spacing: 0.02em;
+    display: block;
+    width: 100%;
+    text-align: center;
+    margin: 4px auto 0 auto;
+}
+
+.envelope:not(.ready-to-click):hover .letter-peek {
+    transform: translateY(-6px);
+}
+
+/* Envelope Pocket Folds */
+.envelope-pocket {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    pointer-events: none;
+    z-index: 3;
+}
+
+.pocket-left {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, #ffccd5, #ffb3c1);
+    clip-path: polygon(0 0, 0 100%, 52% 50%);
+    border-radius: 14px 0 0 14px;
+    filter: drop-shadow(2px 0 4px rgba(0, 0, 0, 0.08));
+}
+
+.pocket-right {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(-135deg, #ffccd5, #ff9ebb);
+    clip-path: polygon(100% 0, 100% 100%, 48% 50%);
+    border-radius: 0 14px 14px 0;
+    filter: drop-shadow(-2px 0 4px rgba(0, 0, 0, 0.08));
+}
+
+.pocket-bottom {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(to top, #ff758f, #ff4d6d);
+    clip-path: polygon(0 100%, 100% 100%, 50% 42%);
+    border-radius: 0 0 14px 14px;
+    filter: drop-shadow(0 -3px 6px rgba(0, 0, 0, 0.12));
+}
+
+/* Top Flap */
+.envelope-flap {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    background: linear-gradient(to bottom, #ffe6ea, #ffb3c1);
+    clip-path: polygon(0 0, 100% 0, 50% 55%);
+    border-radius: 14px 14px 0 0;
+    transform-origin: top center;
+    transition: transform 0.6s var(--transition-smooth);
+    z-index: 4;
+    filter: drop-shadow(0 3px 6px rgba(0, 0, 0, 0.18));
+}
+
+/* Wax Seal */
+.wax-seal {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -20%);
+    width: 44px;
+    height: 44px;
+    background: radial-gradient(circle at 35% 35%, #ff4d6d, #a4133c 70%, #590d22);
+    border-radius: 50%;
+    border: 2px solid #ffd166;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.4), inset 0 2px 4px rgba(255, 255, 255, 0.4);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 5;
+    transition: transform 0.4s var(--transition-smooth), opacity 0.4s ease;
+}
+
+.seal-heart {
+    font-size: 1.2rem;
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+    animation: sealPulse 1.8s ease-in-out infinite;
+}
+
+@keyframes sealPulse {
+
+    0%,
+    100% {
+        transform: scale(1);
+    }
+
+    50% {
+        transform: scale(1.18);
+    }
+}
+
+/* Wiggle animation (when clicked before 100%) */
+.envelope.wiggle {
+    animation: wiggle 0.8s ease-in-out infinite;
+}
+
+@keyframes wiggle {
+
+    0%,
+    100% {
+        transform: rotate(0deg) scale(1);
+    }
+
+    25% {
+        transform: rotate(-6deg) scale(1.02);
+    }
+
+    75% {
+        transform: rotate(6deg) scale(1.02);
+    }
+}
+
+/* Glowing Ready State (when fully revealed 100%) */
+.envelope.ready-to-click {
+    animation: pulseGlow 1.8s infinite alternate !important;
+}
+
+.envelope.ready-to-click .envelope-flap {
+    transform: rotateX(180deg);
+    z-index: 1;
+    transition: transform 0.7s cubic-bezier(0.34, 1.25, 0.64, 1);
+}
+
+.envelope.ready-to-click .letter-peek {
+    transform: translateY(-68px);
+    z-index: 2;
+    transition: transform 0.85s cubic-bezier(0.34, 1.45, 0.64, 1) 0.35s, box-shadow 0.4s ease;
+    box-shadow: 0 -12px 30px rgba(255, 42, 95, 0.35);
+    pointer-events: auto;
+}
+
+.envelope.ready-to-click:hover .letter-peek {
+    transform: translateY(-78px) scale(1.04);
+}
+
+.envelope.ready-to-click .wax-seal {
+    transform: translate(-50%, -100%) scale(0.6);
+    opacity: 0;
+    pointer-events: none;
+    transition: transform 0.5s ease 0.1s, opacity 0.4s ease 0.1s;
+}
+
+@keyframes pulseGlow {
+    0% {
+        box-shadow: 0 0 20px rgba(255, 42, 95, 0.7), 0 0 35px rgba(255, 101, 132, 0.5);
+        transform: scale(1);
+    }
+
+    100% {
+        box-shadow: 0 0 45px rgba(255, 42, 95, 1), 0 0 75px rgba(255, 209, 102, 0.8);
+        transform: scale(1.08);
+    }
+}
+
+@keyframes heartPulse {
+
+    0%,
+    100% {
+        transform: scale(1);
+    }
+
+    50% {
+        transform: scale(1.2);
+    }
+}
+
+/* Drag Hint */
+.drag-hint {
+    position: absolute;
+    bottom: 30px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 5;
+    background: rgba(0, 0, 0, 0.4);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    padding: 10px 22px;
+    border-radius: 30px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 0.9rem;
+    color: #ffe6ea;
+    pointer-events: none;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+    animation: fadeInUp 1s ease forwards 0.5s;
+}
+
+.hint-icon {
+    font-size: 1.2rem;
+    animation: bounce 1.2s infinite;
+}
+
+@keyframes bounce {
+
+    0%,
+    100% {
+        transform: translateY(0);
+    }
+
+    50% {
+        transform: translateY(-5px);
+    }
+}
+
+/* ==========================================================================
+   TOP OVERLAY LAYER (WELCOME SCREEN)
+   ========================================================================== */
+.welcome-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: 10;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: radial-gradient(circle at center, var(--bg-light-purple) 0%, var(--bg-mid-purple) 45%, var(--bg-deep-purple) 100%);
+    perspective: 1000px;
+    transition: opacity 0.8s var(--transition-smooth), transform 0.8s var(--transition-smooth), visibility 0.8s;
+}
+
+.welcome-overlay.dismissed {
+    opacity: 0;
+    transform: scale(1.12);
+    visibility: hidden;
+    pointer-events: none;
+}
+
+.glass-card {
+    position: relative;
+    width: 90%;
+    max-width: 440px;
+    padding: 42px 32px;
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.22);
+    border-radius: 32px;
+    box-shadow: 0 25px 60px rgba(0, 0, 0, 0.55), inset 0 0 25px rgba(255, 255, 255, 0.08);
+    text-align: center;
+    overflow: hidden;
+    transform-style: preserve-3d;
+    will-change: transform;
+    transition: box-shadow 0.3s ease;
+    animation: popInBounce 0.9s var(--transition-smooth);
+}
+
+.glass-card .card-header,
+.glass-card .card-body,
+.glass-card .card-footer {
+    transform-style: preserve-3d;
+}
+
+.glass-card .heart-container {
+    transform: translateZ(28px);
+}
+
+.glass-card .welcome-title {
+    transform: translateZ(22px);
+}
+
+.glass-card .welcome-message,
+.glass-card .welcome-submessage {
+    transform: translateZ(16px);
+}
+
+.glass-card .btn-submit {
+    transform: translateZ(24px);
+    will-change: transform;
+}
+
+.glass-card .btn-submit:hover {
+    transform: translateZ(30px) scale(1.03);
+}
+
+.glass-card .btn-submit:active {
+    transform: translateZ(18px) scale(0.97);
+}
+
+/* ====== BLACK HOLE TRANSITION PHASES ====== */
+
+/* Khi bắt đầu suck phase */
+.glass-card.transitioning {
+    overflow: hidden;
+    animation: none;
+}
+
+/* Phase 2: Card lật xoay thành hình chữ nhật nằm ngang dạng phẳng 3D sâu hơn, LÙI HẲN XUỐNG ĐÁY MÀN HÌNH & BỎ SHADOW */
+.glass-card.card-flip-flat {
+    overflow: hidden !important;
+    animation: none;
+    transform: perspective(800px) rotateX(84deg) rotateZ(90deg) translateX(320px) scale(1.35) !important;
+    opacity: 0.6;
+    transition: transform 0.9s cubic-bezier(0.34, 1.25, 0.64, 1), opacity 0.8s ease !important;
+    box-shadow: none !important;
+    margin: 0 auto !important;
+}
+
+.glass-card.card-flip-flat .card-shimmer {
+    display: none !important;
+}
+
+/* Phase 3: Container trái tim 3D interactive */
+.heart-container.heart-3d-mode {
+    position: fixed !important;
+    margin: 0 !important;
+    z-index: 9999;
+    perspective: 800px;
+    transform-style: preserve-3d;
+    cursor: grab;
+    transition: top 0.9s cubic-bezier(0.34, 1.3, 0.64, 1),
+        left 0.9s cubic-bezier(0.34, 1.3, 0.64, 1),
+        width 0.9s cubic-bezier(0.34, 1.3, 0.64, 1) !important;
+}
+
+.heart-container.heart-3d-mode:active {
+    cursor: grabbing;
+}
+
+/* Trái tim 3D Dots Matrix Container */
+.dot-heart-cloud {
+    position: relative;
+    width: 220px;
+    height: 220px;
+    transform-style: preserve-3d;
+    perspective: 1000px;
+    animation: rotateDotCloud 12s linear infinite;
+}
+
+@keyframes rotateDotCloud {
+    0% {
+        transform: rotateY(0deg) rotateX(10deg);
+    }
+
+    100% {
+        transform: rotateY(360deg) rotateX(10deg);
+    }
+}
+
+.dot-particle {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: radial-gradient(circle, #ffffff 0%, #ff6584 40%, #ff2a5f 80%);
+    box-shadow: 0 0 8px #ff2a5f, 0 0 16px #ff758f, 0 0 24px rgba(255, 255, 255, 0.8);
+    will-change: transform, opacity;
+    transform-style: preserve-3d;
+}
+
+@keyframes dotFloatGlow {
+    0% {
+        opacity: 0.4;
+        box-shadow: 0 0 5px #ff2a5f, 0 0 10px #ff758f;
+    }
+
+    100% {
+        opacity: 1;
+        box-shadow: 0 0 12px #ff2a5f, 0 0 24px #ff758f, 0 0 35px #ffffff;
+    }
+}
+
+/* Trái tim 3D expand style */
+.pulsing-heart-icon.heart-3d-expand {
+    animation: none !important;
+    font-size: 7.5rem !important;
+    transition: font-size 0.9s cubic-bezier(0.34, 1.56, 0.64, 1),
+        filter 0.5s ease,
+        transform 0.1s ease !important;
+    filter: drop-shadow(0 0 35px rgba(255, 42, 95, 1)) drop-shadow(0 0 70px rgba(255, 101, 132, 0.8)) !important;
+    transform-style: preserve-3d;
+    will-change: transform;
+}
+
+
+/* Các element bị hút vào - base transition (override per element in JS) */
+.suck-in {
+    pointer-events: none !important;
+    animation: none !important;
+    will-change: transform;
+}
+
+/* Giữ lại .glass-card nhưng xoá animation cũ khi cần */
+.glass-card.no-tilt {
+    transition: transform 0.85s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.85s ease !important;
+}
+
+@keyframes popInBounce {
+    0% {
+        opacity: 0;
+        transform: scale(0.85) translateY(40px) rotateX(10deg);
+    }
+
+    60% {
+        transform: scale(1.02) translateY(-6px) rotateX(-2deg);
+    }
+
+    100% {
+        opacity: 1;
+        transform: scale(1) translateY(0) rotateX(0deg);
+    }
+}
+
+/* Inner Card Shimmer Sweep */
+.card-shimmer {
+    position: absolute;
+    top: 0;
+    left: -150%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg,
+            transparent 0%,
+            rgba(255, 255, 255, 0.08) 50%,
+            transparent 100%);
+    transform: skewX(-25deg);
+    animation: shimmerCard 6s ease-in-out infinite;
+    pointer-events: none;
+    z-index: 1;
+}
+
+@keyframes shimmerCard {
+
+    0%,
+    70% {
+        left: -150%;
+    }
+
+    100% {
+        left: 200%;
+    }
+}
+
+/* Orbit Floating Particles Around Card Body */
+.orbit-particles {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    z-index: 2;
+}
+
+.orbit-particle {
+    position: absolute;
+    font-size: 1.2rem;
+    filter: drop-shadow(0 0 8px rgba(255, 101, 132, 0.8));
+    animation: orbitFloat 8s ease-in-out infinite alternate;
+}
+
+.orbit-particle.p1 {
+    top: 12%;
+    left: 8%;
+    animation-delay: 0s;
+    font-size: 1.4rem;
+}
+
+.orbit-particle.p2 {
+    top: 18%;
+    right: 10%;
+    animation-delay: 1.2s;
+    font-size: 1.2rem;
+}
+
+.orbit-particle.p3 {
+    top: 50%;
+    left: 4%;
+    animation-delay: 2.5s;
+    font-size: 1.1rem;
+}
+
+.orbit-particle.p4 {
+    bottom: 25%;
+    right: 6%;
+    animation-delay: 3.8s;
+    font-size: 1.3rem;
+}
+
+.orbit-particle.p5 {
+    bottom: 12%;
+    left: 14%;
+    animation-delay: 4.5s;
+    font-size: 1.2rem;
+}
+
+.orbit-particle.p6 {
+    top: 40%;
+    right: 4%;
+    animation-delay: 5.8s;
+    font-size: 1.1rem;
+}
+
+@keyframes orbitFloat {
+    0% {
+        transform: translate(0, 0) scale(1) rotate(0deg);
+        opacity: 0.6;
+    }
+
+    50% {
+        transform: translate(8px, -15px) scale(1.2) rotate(12deg);
+        opacity: 1;
+    }
+
+    100% {
+        transform: translate(-8px, -28px) scale(0.9) rotate(-12deg);
+        opacity: 0.7;
+    }
+}
+
+/* Sparkles */
+.sparkle {
+    position: absolute;
+    pointer-events: none;
+    font-size: 1.3rem;
+    z-index: 2;
+    animation: sparkleFloat 3.5s ease-in-out infinite alternate;
+}
+
+.sparkle-1 {
+    top: 15px;
+    left: 20px;
+    animation-delay: 0s;
+}
+
+.sparkle-2 {
+    top: 25px;
+    right: 25px;
+    animation-delay: 0.8s;
+}
+
+.sparkle-3 {
+    bottom: 20px;
+    left: 25px;
+    animation-delay: 1.5s;
+}
+
+.sparkle-4 {
+    bottom: 15px;
+    right: 20px;
+    animation-delay: 2.2s;
+}
+
+@keyframes sparkleFloat {
+    0% {
+        transform: translateY(0) scale(1) rotate(0deg);
+        opacity: 0.5;
+    }
+
+    100% {
+        transform: translateY(-12px) scale(1.25) rotate(20deg);
+        opacity: 1;
+    }
+}
+
+/* Card Sections */
+.card-header,
+.card-body,
+.card-footer {
+    position: relative;
+    z-index: 3;
+}
+
+.card-header {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-bottom: 22px;
+}
+
+/* Heart Container */
+.heart-container {
+    position: relative;
+    display: inline-flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 26px;
+}
+
+.pulsing-heart-icon {
+    position: relative;
+    font-size: 3.4rem;
+    line-height: 1;
+    filter: drop-shadow(0 0 18px rgba(255, 42, 95, 0.9));
+    animation: heartSpringBeat 2.5s cubic-bezier(0.34, 1.3, 0.64, 1) infinite;
+    transform-origin: bottom center;
+    z-index: 2;
+}
+
+/* Hiệu ứng rung rung lắc dữ dội tích năng lượng trước khi hóa thành 3D dots */
+.pulsing-heart-icon.heart-vibrate {
+    animation: heartVibrate 0.08s ease-in-out infinite alternate !important;
+    filter: drop-shadow(0 0 35px rgba(255, 42, 95, 1)) drop-shadow(0 0 60px rgba(255, 101, 132, 1)) !important;
+}
+
+@keyframes heartVibrate {
+    0% {
+        transform: scale(1.15) rotate(-10deg) translate(-2px, 1px);
+    }
+
+    100% {
+        transform: scale(1.3) rotate(10deg) translate(2px, -1px);
+    }
+}
+
+/* Heartbeat EKG SVG Line - Continuous Scroll (like a real heart monitor) */
+.ekg-wrapper {
+    width: 310px;
+    max-width: 95%;
+    height: 22px;
+    margin: 10px auto 22px auto;
+    overflow: hidden;
+    /* Fade mờ 2 cạnh trái/phải cho cảm giác cuộn mượt */
+    -webkit-mask-image: linear-gradient(90deg, transparent 0%, black 10%, black 90%, transparent 100%);
+    mask-image: linear-gradient(90deg, transparent 0%, black 10%, black 90%, transparent 100%);
+}
+
+.ekg-line {
+    /* Rộng gấp đôi wrapper để loop cuộn seamlessly */
+    width: 620px;
+    height: 100%;
+    overflow: visible;
+    animation: ekgScroll 6s linear infinite;
+}
+
+.ekg-path {
+    fill: none;
+    stroke: var(--accent-pink);
+    stroke-width: 2.2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    filter: drop-shadow(0 0 5px rgba(255, 101, 132, 0.9));
+}
+
+/* Cuộn SVG từ phải sang trái liên tục, seamless loop */
+@keyframes ekgScroll {
+    0% {
+        transform: translateX(0);
+    }
+
+    100% {
+        transform: translateX(-310px);
+    }
+}
+
+
+@keyframes heartSpringBeat {
+
+    /* Trạng thái nghỉ ban đầu */
+    0%,
+    100% {
+        transform: translateY(0) scale(1, 1) rotate(0deg);
+        filter: drop-shadow(0 0 15px rgba(255, 42, 95, 0.7));
+    }
+
+    /* 1. Nhún nhẹ chuẩn bị bật lên */
+    7% {
+        transform: translateY(4px) scale(1.14, 0.86);
+    }
+
+    /* 2. Nhảy lò xo vút lên đỉnh cao */
+    18% {
+        transform: translateY(-22px) scale(0.88, 1.22) rotate(-3deg);
+        filter: drop-shadow(0 0 25px rgba(255, 42, 95, 0.9));
+    }
+
+    /* 3. ĐẬP NHỊP TIM 1 trên đỉnh! */
+    28% {
+        transform: translateY(-20px) scale(1.24, 1.24) rotate(2deg);
+        filter: drop-shadow(0 0 34px rgba(255, 42, 95, 1));
+    }
+
+    /* Thu lại nhẹ giữa 2 nhịp đập */
+    36% {
+        transform: translateY(-18px) scale(1.08, 1.08);
+    }
+
+    /* 4. ĐẬP NHỊP TIM 2 phát sáng rực rỡ! */
+    44% {
+        transform: translateY(-20px) scale(1.28, 1.28) rotate(-2deg);
+        filter: drop-shadow(0 0 38px rgba(255, 101, 132, 1));
+    }
+
+    /* 5. Rơi xuống chạm đất nhún nhẹ */
+    58% {
+        transform: translateY(5px) scale(1.18, 0.84) rotate(2deg);
+        filter: drop-shadow(0 0 18px rgba(255, 42, 95, 0.7));
+    }
+
+    /* 6. Dội ngược nhảy nhẹ lên lại */
+    70% {
+        transform: translateY(-4px) scale(0.95, 1.06) rotate(-1deg);
+    }
+
+    /* 7. Ổn định về lại vị trí */
+    82% {
+        transform: translateY(1px) scale(1.02, 0.98);
+    }
+}
+
+.welcome-title {
+    font-family: var(--font-body);
+    font-size: 2.1rem;
+    font-weight: 700;
+    letter-spacing: -0.5px;
+    min-height: 2.6rem;
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    flex-wrap: nowrap;
+    margin: 0 auto;
+}
+
+/* Individual Character Pure White Styling */
+.typewriter-char {
+    display: inline-block;
+    font-weight: 700;
+    color: #ffffff;
+    -webkit-text-fill-color: #ffffff;
+    text-shadow: 0 0 12px rgba(255, 255, 255, 0.75), 0 0 22px rgba(255, 101, 132, 0.45);
+    padding: 0 1px;
+    transform-origin: bottom center;
+    transition: transform 0.2s ease;
+}
+
+.typewriter-char.space {
+    width: 0.32em;
+}
+
+/* Playful Independent Spring Bounce Animation */
+.typewriter-char.bouncy {
+    animation: springBounce 2.4s cubic-bezier(0.34, 1.3, 0.64, 1) infinite;
+    animation-delay: var(--delay, 0s);
+}
+
+@keyframes springBounce {
+
+    0%,
+    62%,
+    100% {
+        transform: translateY(0) scale(1, 1) rotate(0deg);
+    }
+
+    12% {
+        transform: translateY(-10px) scale(0.92, 1.14) rotate(-3deg);
+    }
+
+    24% {
+        transform: translateY(4px) scale(1.08, 0.92) rotate(2deg);
+    }
+
+    36% {
+        transform: translateY(-5px) scale(0.96, 1.05) rotate(-1.5deg);
+    }
+
+    48% {
+        transform: translateY(2px) scale(1.03, 0.97) rotate(1deg);
+    }
+
+    58% {
+        transform: translateY(0) scale(1, 1) rotate(0deg);
+    }
+}
+
+/* Typewriter Line Cursor */
+.typewriter-cursor {
+    font-weight: 300;
+    font-size: 1.8rem;
+    color: var(--accent-pink);
+    animation: blinkCursor 0.7s step-end infinite;
+    margin-left: 3px;
+    line-height: 1;
+    display: inline-block;
+}
+
+@keyframes blinkCursor {
+    50% {
+        opacity: 0;
+    }
+}
+
+.welcome-message {
+    font-size: 1.06rem;
+    line-height: 1.65;
+    color: #e2d9f3;
+    margin-bottom: 12px;
+    font-weight: 300;
+}
+
+.welcome-submessage {
+    font-size: 0.94rem;
+    color: var(--accent-soft-pink);
+    margin-bottom: 32px;
+    font-weight: 400;
+}
+
+/* Submit Button */
+.btn-submit {
+    position: relative;
+    width: 100%;
+    padding: 17px 30px;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-radius: 50px;
+    background: linear-gradient(135deg, #ff2a5f 0%, #ff6584 50%, #ff8fa3 100%);
+    background-size: 200% auto;
+    color: #ffffff;
+    font-family: var(--font-body);
+    font-size: 1.15rem;
+    font-weight: 700;
+    letter-spacing: 0.3px;
+    cursor: pointer;
+    box-shadow: 0 10px 32px rgba(255, 42, 95, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.4);
+    transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.3s ease, background-position 0.5s ease;
+    overflow: hidden;
+    animation: pulseButtonBorder 2.5s infinite alternate;
+}
+
+@keyframes pulseButtonBorder {
+    0% {
+        box-shadow: 0 10px 32px rgba(255, 42, 95, 0.45), 0 0 0 0 rgba(255, 42, 95, 0.3);
+    }
+
+    100% {
+        box-shadow: 0 14px 40px rgba(255, 42, 95, 0.7), 0 0 0 8px rgba(255, 42, 95, 0);
+    }
+}
+
+.btn-submit:hover {
+    transform: scale(1.03);
+    background-position: right center;
+    box-shadow: 0 18px 45px rgba(255, 42, 95, 0.7), inset 0 1px 0 rgba(255, 255, 255, 0.6);
+}
+
+.btn-submit:active {
+    transform: scale(0.97);
+}
+
+.btn-glow {
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle, rgba(255, 255, 255, 0.45) 0%, transparent 60%);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    pointer-events: none;
+}
+
+.btn-submit:hover .btn-glow {
+    opacity: 1;
+}
+
+/* Button Continuous Shimmer Sweep */
+.btn-shimmer {
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 60%;
+    height: 100%;
+    background: linear-gradient(90deg,
+            transparent,
+            rgba(255, 255, 255, 0.45),
+            transparent);
+    transform: skewX(-20deg);
+    animation: shimmerBtn 3.5s infinite;
+    pointer-events: none;
+}
+
+@keyframes shimmerBtn {
+
+    0%,
+    60% {
+        left: -100%;
+    }
+
+    100% {
+        left: 200%;
+    }
+}
+
+/* ==========================================================================
+   ROMANTIC LETTER MODAL — Premium Redesign
+   ========================================================================== */
+.letter-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: 20;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.6s var(--transition-smooth), visibility 0.6s;
+}
+
+.letter-modal.active {
+    opacity: 1;
+    visibility: visible;
+}
+
+/* Backdrop lãng mạn với gradient tím hồng */
+.modal-backdrop {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(ellipse at center,
+            rgba(80, 10, 60, 0.92) 0%,
+            rgba(20, 3, 35, 0.97) 100%);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+}
+
+/* Floating petals inside modal */
+.modal-petals {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    overflow: hidden;
+    z-index: 1;
+}
+
+.petal {
+    position: absolute;
+    font-size: 1.4rem;
+    opacity: 0.55;
+    animation: petalFloat linear infinite;
+}
+
+.petal-1 {
+    left: 8%;
+    animation-duration: 7s;
+    animation-delay: 0s;
+    font-size: 1.2rem;
+}
+
+.petal-2 {
+    left: 25%;
+    animation-duration: 9s;
+    animation-delay: 1.5s;
+    font-size: 1rem;
+}
+
+.petal-3 {
+    left: 55%;
+    animation-duration: 6s;
+    animation-delay: 0.8s;
+    font-size: 1.4rem;
+}
+
+.petal-4 {
+    left: 75%;
+    animation-duration: 8s;
+    animation-delay: 2.5s;
+    font-size: 1.1rem;
+}
+
+.petal-5 {
+    left: 90%;
+    animation-duration: 5.5s;
+    animation-delay: 0.3s;
+    font-size: 0.9rem;
+}
+
+@keyframes petalFloat {
+    0% {
+        transform: translateY(110vh) rotate(0deg);
+        opacity: 0;
+    }
+
+    10% {
+        opacity: 0.55;
+    }
+
+    90% {
+        opacity: 0.45;
+    }
+
+    100% {
+        transform: translateY(-10vh) rotate(360deg);
+        opacity: 0;
+    }
+}
+
+.modal-card {
+    position: relative;
+    width: 92%;
+    max-width: 500px;
+    z-index: 2;
+    transform: scale(0.8) translateY(40px);
+    transition: transform 0.6s cubic-bezier(0.34, 1.25, 0.64, 1);
+}
+
+.letter-modal.active .modal-card {
+    transform: scale(1) translateY(0);
+}
+
+/* Nút đóng */
+.modal-close-btn {
+    position: absolute;
+    top: -16px;
+    right: -16px;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #ff4d6d, #c9184a);
+    color: #fff;
+    font-size: 1.5rem;
+    border: 2px solid rgba(255, 255, 255, 0.4);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 6px 18px rgba(200, 24, 74, 0.55), 0 2px 6px rgba(0, 0, 0, 0.3);
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
+    z-index: 10;
+    line-height: 1;
+}
+
+.modal-close-btn:hover {
+    transform: scale(1.15) rotate(90deg);
+    box-shadow: 0 10px 28px rgba(200, 24, 74, 0.75);
+}
+
+/* ── Giấy thư vintage ─────────────────────────────────── */
+.letter-paper {
+    position: relative;
+    background:
+        linear-gradient(to bottom,
+            #fff8f9 0%,
+            #fffcfd 100%);
+    /* Dòng kẻ ngang như thư tay */
+    background-image:
+        linear-gradient(to bottom, transparent 93%, #f5c5cc 93%),
+        linear-gradient(to bottom, #fff8f9 0%, #fffcfd 100%);
+    background-size: 100% 36px, 100% 100%;
+    border-radius: 18px;
+    padding: 42px 36px 36px;
+    box-shadow:
+        0 30px 70px rgba(0, 0, 0, 0.55),
+        0 0 0 1px rgba(255, 180, 195, 0.6),
+        0 0 0 6px rgba(255, 255, 255, 0.08),
+        inset 0 1px 0 rgba(255, 255, 255, 0.9);
+    overflow: hidden;
+}
+
+/* Watermark trái tim lớn mờ ở giữa */
+.letter-paper::before {
+    content: '💖';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 14rem;
+    opacity: 0.04;
+    pointer-events: none;
+    user-select: none;
+    line-height: 1;
+}
+
+/* Dải màu đỏ bên trái như thư học sinh */
+.letter-paper::after {
+    content: '';
+    position: absolute;
+    left: 54px;
+    top: 0;
+    bottom: 0;
+    width: 1.5px;
+    background: rgba(255, 100, 130, 0.25);
+}
+
+/* Góc trang trí */
+.corner {
+    position: absolute;
+    font-size: 1.3rem;
+    color: rgba(201, 24, 74, 0.35);
+    line-height: 1;
+    font-family: 'Georgia', serif;
+}
+
+.corner-tl {
+    top: 10px;
+    left: 12px;
+}
+
+.corner-tr {
+    top: 10px;
+    right: 12px;
+    transform: scaleX(-1);
+}
+
+.corner-bl {
+    bottom: 10px;
+    left: 12px;
+    transform: scaleY(-1);
+}
+
+.corner-br {
+    bottom: 10px;
+    right: 12px;
+    transform: scale(-1);
+}
+
+/* ── Header ───────────────────────────────────────────── */
+.letter-header {
+    text-align: center;
+    margin-bottom: 24px;
+}
+
+.letter-top-deco {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    margin-bottom: 10px;
+}
+
+.deco-line {
+    flex: 1;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, #ffb3c1, transparent);
+    max-width: 80px;
+}
+
+.deco-line.short {
+    max-width: 50px;
+}
+
+.deco-heart {
+    font-size: 1.3rem;
+}
+
+.deco-star {
+    font-size: 0.9rem;
+    color: #c9184a;
+}
+
+.letter-title {
+    font-family: var(--font-heading);
+    font-size: 3.2rem;
+    color: #c9184a;
+    font-weight: normal;
+    line-height: 1;
+    text-shadow:
+        0 2px 12px rgba(201, 24, 74, 0.25),
+        0 0 30px rgba(255, 101, 132, 0.15);
+    animation: titleShimmer 3s ease-in-out infinite alternate;
+}
+
+@keyframes titleShimmer {
+    0% {
+        text-shadow: 0 2px 12px rgba(201, 24, 74, 0.2), 0 0 20px rgba(255, 101, 132, 0.1);
+    }
+
+    100% {
+        text-shadow: 0 2px 20px rgba(201, 24, 74, 0.45), 0 0 50px rgba(255, 101, 132, 0.3);
+    }
+}
+
+/* ── Vùng kẻ dòng nội dung & Khung ảnh Polaroid ───────── */
+.letter-lines-bg {
+    position: relative;
+    padding: 4px 0;
+}
+
+/* Khung ảnh Polaroid dễ thương dán ở góc phải lá thư */
+.letter-photo-frame {
+    float: right;
+    width: 110px;
+    background: #ffffff;
+    padding: 6px 6px 10px 6px;
+    border-radius: 4px;
+    border: 1px solid rgba(255, 204, 213, 0.8);
+    box-shadow: 0 8px 22px rgba(201, 24, 74, 0.22), 0 2px 6px rgba(0, 0, 0, 0.12);
+    transform: rotate(5deg);
+    margin: 4px 0 12px 16px;
+    position: relative;
+    z-index: 5;
+    cursor: pointer;
+    transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.35s ease;
+}
+
+.letter-photo-frame:hover {
+    transform: scale(1.15) rotate(0deg);
+    box-shadow: 0 14px 32px rgba(201, 24, 74, 0.4), 0 4px 10px rgba(0, 0, 0, 0.18);
+    z-index: 10;
+}
+
+/* Washi Tape dán góc ảnh */
+.photo-tape {
+    position: absolute;
+    top: -8px;
+    left: 50%;
+    transform: translateX(-50%) rotate(-3deg);
+    width: 46px;
+    height: 14px;
+    background: rgba(255, 179, 193, 0.85);
+    border: 1px dashed rgba(255, 255, 255, 0.6);
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    z-index: 6;
+}
+
+.photo-inner {
+    width: 100%;
+    height: 95px;
+    overflow: hidden;
+    border-radius: 3px;
+    background: #fff0f3;
+}
+
+.photo-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    transition: transform 0.4s ease;
+}
+
+.photo-caption {
+    font-family: var(--font-script);
+    font-size: 0.85rem;
+    color: #4a3b47;
+    font-weight: 700;
+    text-align: center;
+    margin-top: 5px;
+    line-height: 1.1;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.letter-photo-frame:hover .photo-img {
+    transform: scale(1.08);
+}
+
+.letter-content {
+    font-size: 1.2rem;
+    line-height: 2.25rem;
+    /* khớp với dòng kẻ 36px */
+    color: #3a2a22;
+    font-family: var(--font-body);
+    font-weight: 400;
+}
+
+.letter-greeting {
+    font-family: var(--font-script);
+    font-size: 1.4rem;
+    color: #a4133c;
+    font-weight: 700;
+    margin-bottom: 0;
+}
+
+.letter-content p {
+    margin-bottom: 0;
+    font-family: var(--font-script);
+}
+
+.letter-content em {
+    font-family: var(--font-script);
+    font-size: 1.25rem;
+    color: #c9184a;
+    font-style: italic;
+    font-weight: 700;
+}
+
+/* ── Chữ ký ────────────────────────────────────────────── */
+.letter-signature {
+    margin-top: 28px;
+    text-align: right;
+}
+
+.sig-divider {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 8px;
+    margin-bottom: 10px;
+    font-size: 0.9rem;
+    color: #c9184a;
+}
+
+.sig-label {
+    font-size: 0.9rem;
+    color: #8c7362;
+    display: block;
+    margin-bottom: 2px;
+}
+
+.signature-name {
+    font-family: var(--font-heading);
+    font-size: 2rem;
+    color: #a4133c;
+    font-weight: normal;
+    line-height: 1.2;
+    text-shadow: 0 1px 8px rgba(164, 19, 60, 0.2);
+}
+
+.letter-postmark {
+    display: inline-block;
+    margin-top: 8px;
+    font-size: 0.75rem;
+    color: rgba(164, 19, 60, 0.5);
+    font-style: italic;
+    letter-spacing: 0.05em;
+    border: 1px solid rgba(164, 19, 60, 0.2);
+    border-radius: 4px;
+    padding: 2px 8px;
+}
+
+/* Keyframes */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translate(-50%, 20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translate(-50%, 0);
+    }
+}
+
+/* Responsive adjustments */
+@media (max-width: 480px) {
+    .glass-card {
+        padding: 30px 20px;
+    }
+
+    .welcome-title {
+        font-size: 1.5rem;
+    }
+
+    .envelope {
+        width: 170px;
+        height: 110px;
+    }
+
+    .letter-peek {
+        top: 12px;
+        height: 92px;
+        padding-top: 6px;
+    }
+
+    .letter-preview-text {
+        font-size: 1rem;
+        text-align: center;
+        width: 100%;
+        margin: 0 auto;
+    }
+
+    .envelope.ready-to-click .letter-peek {
+        transform: translateY(-55px);
+    }
+
+    .envelope.ready-to-click:hover .letter-peek {
+        transform: translateY(-62px) scale(1.03);
+    }
+
+    .letter-paper {
+        padding: 30px 20px 24px;
+    }
+
+    .letter-paper::after {
+        left: 36px;
+    }
+
+    .letter-title {
+        font-size: 2.3rem;
+    }
+
+    .letter-content {
+        font-size: 0.95rem;
+        line-height: 2.1rem;
+    }
+
+    .letter-photo-frame {
+        width: 85px;
+        padding: 4px 4px 8px 4px;
+        margin: 2px 0 8px 10px;
+    }
+
+    .photo-inner {
+        height: 72px;
+    }
+
+    .signature-name {
+        font-size: 1.6rem;
+    }
+}
+
+/* ==========================================================================
+   FLOATING EDITOR BUTTON
+   ========================================================================== */
+.floating-editor-btn {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 1000;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 16px;
+    background: rgba(26, 16, 37, 0.7);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 77, 109, 0.35);
+    border-radius: 9999px;
+    color: #fff0f3;
+    font-size: 0.85rem;
+    font-weight: 500;
+    text-decoration: none;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3), 0 0 10px rgba(255, 77, 109, 0.2);
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    opacity: 0.85;
+}
+
+.floating-editor-btn:hover {
+    opacity: 1;
+    transform: translateY(-2px) scale(1.04);
+    background: rgba(38, 24, 54, 0.9);
+    border-color: rgba(255, 77, 109, 0.7);
+    box-shadow: 0 6px 24px rgba(255, 77, 109, 0.35);
+}
+
+.floating-editor-btn .icon {
+    font-size: 1rem;
+}
+
+@media (max-width: 768px) {
+    .floating-editor-btn {
+        top: 14px;
+        right: 14px;
+        padding: 6px 12px;
+        font-size: 0.78rem;
+    }
+}

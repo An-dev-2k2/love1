@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Gửi Em</title>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@600;700&family=Great+Vibes&family=Outfit:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet">
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml"
+        href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='50%25' x='50%25' dominant-baseline='central' text-anchor='middle' font-size='75'>❤️</text></svg>">
+
+    <!-- Three.js 3D Library -->
+    <script src="https://unpkg.com/three@0.158.0/build/three.min.js"></script>
+
+    <!-- CSS -->
+    <link rel="stylesheet" href="style.css">
+
+    <!-- Canvas Confetti Library -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
+
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+</head>
+
+<body>
+
+    <!-- Floating Customizer / Editor Button -->
+    <a href="editor.html" class="floating-editor-btn" title="Chỉnh sửa nội dung & hình ảnh">
+        <i data-lucide="settings" style="width: 16px; height: 16px;"></i>
+        <span>Tùy chỉnh</span>
+    </a>
+
+    <!-- Ambient Background Bokeh Canvas -->
+    <canvas id="bg-canvas"></canvas>
+
+    <!-- Base Layer (Interactive Hearts & Secret Letter) -->
+    <main id="interactive-container" class="interactive-layer">
+
+        <!-- Progress Bar UI (Thanh tiến trình tìm bí mật 0% - 100%) -->
+        <div id="progress-container" class="progress-container">
+            <div class="progress-info">
+                <span class="progress-title">Tiến trình tìm bí mật:</span>
+                <span id="progress-percent" class="progress-percent">0%</span>
+            </div>
+            <div class="progress-bar-track">
+                <div id="progress-bar-fill" class="progress-bar-fill"></div>
+            </div>
+        </div>
+
+        <!-- Bottom Hearts Canvas (Lớp trái tim nằm phía dưới bức thư) -->
+        <canvas id="heart-bottom-canvas"></canvas>
+
+        <!-- Secret Envelope Container (Nằm giữa 2 lớp trái tim) -->
+        <div id="envelope-wrapper" class="envelope-wrapper">
+            <div class="envelope-glow-aura"></div>
+            <!-- Envelope UI 3D -->
+            <div id="envelope" class="envelope">
+                <div class="envelope-back"></div>
+                <!-- letter-clip: clip container để lá thư không lòi ra dưới phong bì -->
+                <div class="letter-clip">
+                    <div class="letter-peek">
+                        <div class="letter-peek-body">
+                            <span class="letter-preview-text">Gửi người thương</span>
+                            <span class="letter-subtext">Nhấn để mở</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="envelope-pocket">
+                    <div class="pocket-left"></div>
+                    <div class="pocket-right"></div>
+                    <div class="pocket-bottom"></div>
+                </div>
+                <div class="envelope-flap"></div>
+                <div class="wax-seal">
+                    <span class="seal-heart">💖</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Interactive Hearts Canvas / Physics Overlay -->
+        <canvas id="heart-canvas"></canvas>
+
+        <!-- Chat Bubble Tooltip (TRÊN CÙNG, không bị canvas che) -->
+        <div id="chat-tooltip" class="chat-tooltip">
+            <span class="tooltip-text">Nhanh lên đê ní êi 💖</span>
+            <div class="tooltip-arrow"></div>
+        </div>
+
+        <!-- Progress Indicator / Instructions -->
+        <div id="drag-hint" class="drag-hint">
+            <span class="hint-icon">👆</span>
+            <span class="hint-text">Dùng tay/chuột kéo trái tim ra để tìm bí mật nhé!</span>
+        </div>
+    </main>
+
+    <!-- Top Layer (Welcome / Intro Overlay) -->
+    <section id="welcome-overlay" class="welcome-overlay">
+        <div class="glass-card" id="welcome-card">
+            <!-- Inner Shimmer Overlay -->
+            <div class="card-shimmer"></div>
+
+            <div class="card-header">
+                <div class="heart-container">
+                    <div class="pulsing-heart-icon">❤️</div>
+                </div>
+                <h1 class="welcome-title" id="welcome-title"><span id="typewriter-text"></span><span
+                        class="typewriter-cursor" id="typewriter-cursor">|</span></h1>
+                <!-- Heartbeat EKG SVG line - continuous scroll monitor -->
+                <div class="ekg-wrapper">
+                    <svg class="ekg-line" viewBox="0 0 620 40" preserveAspectRatio="none">
+                        <!-- Tile 1 (0→310): 2 nhịp ECG thực tế -->
+                        <path class="ekg-path" d="
+                            M0,20 L40,20
+                            L46,16 L52,20
+                            L62,20 L65,23 L69,2 L73,27 L76,20
+                            L88,20 L94,14 L102,20
+                            L140,20
+                            L146,16 L152,20
+                            L162,20 L165,23 L169,2 L173,27 L176,20
+                            L188,20 L194,14 L202,20
+                            L310,20
+                            M310,20 L350,20
+                            L356,16 L362,20
+                            L372,20 L375,23 L379,2 L383,27 L386,20
+                            L398,20 L404,14 L412,20
+                            L450,20
+                            L456,16 L462,20
+                            L472,20 L475,23 L479,2 L483,27 L486,20
+                            L498,20 L504,14 L512,20
+                            L620,20
+                        " />
+                    </svg>
+                </div>
+            </div>
+
+            <div class="card-body">
+                <p class="welcome-message">
+                    Có một món quà bí mật nhỏ đang được giấu giữa rừng trái tim ngọt ngào...
+                </p>
+                <p class="welcome-submessage">
+                    Bạn có muốn khám phá điều bí mật đang chờ đón bạn không?
+                </p>
+            </div>
+
+            <div class="card-footer">
+                <button id="btn-submit" class="btn-submit">
+                    <span class="btn-text">Bắt đầu thôi</span>
+                    <div class="btn-glow"></div>
+                    <div class="btn-shimmer"></div>
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Romantic Letter Modal -->
+    <div id="letter-modal" class="letter-modal">
+        <div class="modal-backdrop"></div>
+        <div class="modal-card">
+            <button id="modal-close" class="modal-close-btn">×</button>
+
+            <!-- Floating petals inside modal -->
+            <div class="modal-petals" aria-hidden="true">
+                <span class="petal petal-1">🌸</span>
+                <span class="petal petal-2">🌹</span>
+                <span class="petal petal-3">💮</span>
+                <span class="petal petal-4">🌸</span>
+                <span class="petal petal-5">✨</span>
+            </div>
+
+            <div class="letter-paper">
+                <!-- Decorative corners -->
+                <div class="corner corner-tl">❧</div>
+                <div class="corner corner-tr">❧</div>
+                <div class="corner corner-bl">❧</div>
+                <div class="corner corner-br">❧</div>
+
+                <!-- Header -->
+                <div class="letter-header">
+                    <div class="letter-top-deco">
+                        <span class="deco-line"></span>
+                        <span class="deco-heart">💖</span>
+                        <span class="deco-line"></span>
+                    </div>
+                    <h2 class="letter-title">Gửi Người Thương</h2>
+                    <div class="letter-top-deco" style="margin-top: 8px;">
+                        <span class="deco-line"></span>
+                        <span class="deco-star">✦</span>
+                        <span class="deco-line"></span>
+                    </div>
+                </div>
+
+                <!-- Lined letter content -->
+                <div class="letter-lines-bg">
+                    <!-- Cute Polaroid Photo Frame -->
+                    <div class="letter-photo-frame">
+                        <div class="photo-tape"></div>
+                        <div class="photo-inner">
+                            <img src="image.webp" alt="Người Thương" class="photo-img" />
+                        </div>
+                        <div class="photo-caption">Người Thương</div>
+                    </div>
+
+                    <div class="letter-content">
+                        <p class="letter-greeting">Gửi cô gái đáng yêu,</p>
+                        <p>Cảm ơn em đã kiên nhẫn tìm thấy lá thư này... Giống như giữa muôn vàn trái tim ngoài kia, ánh
+                            mắt anh ngay từ đầu đã luôn hướng về em.</p>
+                        <p>Từ ngày có em xuất hiện, thế giới của anh bỗng trở nên ấm áp và rực rỡ hơn rất nhiều. Mỗi nụ
+                            cười, từng ánh mắt của em đều làm tim anh xao xuyến.</p>
+                        <p>Anh đã ấp ủ tình cảm này từ rất lâu, và hôm nay anh muốn dành trọn dũng khí để hỏi em một
+                            điều: <em>Em làm người yêu anh nhé?</em> </p>
+                    </div>
+                </div>
+
+                <!-- Signature -->
+                <div class="letter-signature">
+                    <div class="sig-divider">
+                        <span class="deco-line short"></span>
+                        <span>💕</span>
+                        <span class="deco-line short"></span>
+                    </div>
+                    <h3 class="signature-name">Chàng Trai Thương Em</h3>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- JS Logic -->
+    <script src="script.js"></script>
+    <script>lucide.createIcons();</script>
+</body>
+
+</html>
